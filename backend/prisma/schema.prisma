@@ -1,0 +1,226 @@
+// Prisma Schema for Legal Due Diligence Platform
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  MANAGER
+  REVIEWER
+  VIEWER
+}
+
+enum ProjectStatus {
+  DRAFT
+  ACTIVE
+  REVIEW
+  COMPLETED
+  ARCHIVED
+}
+
+enum DocumentStatus {
+  PENDING
+  PROCESSING
+  ANALYZED
+  REVIEWED
+  FLAGGED
+  APPROVED
+}
+
+enum DocumentType {
+  CONTRACT
+  FINANCIAL
+  LEGAL
+  COMPLIANCE
+  CORRESPONDENCE
+  OTHER
+}
+
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+model User {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  passwordHash  String   @map("password_hash")
+  firstName     String   @map("first_name")
+  lastName      String   @map("last_name")
+  role          UserRole @default(VIEWER)
+  isActive      Boolean  @default(true) @map("is_active")
+  lastLoginAt   DateTime? @map("last_login_at")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  projects      ProjectMember[]
+  documents     Document[]
+  comments      Comment[]
+  activities    ActivityLog[]
+
+  @@map("users")
+}
+
+model Project {
+  id            String        @id @default(uuid())
+  name          String
+  description   String?
+  status        ProjectStatus @default(DRAFT)
+  clientName    String?       @map("client_name")
+  dealValue     Decimal?      @map("deal_value") @db.Decimal(15, 2)
+  targetDate    DateTime?     @map("target_date")
+  vdrProvider   String?       @map("vdr_provider")
+  vdrProjectId  String?       @map("vdr_project_id")
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+
+  members       ProjectMember[]
+  documents     Document[]
+  checklists    Checklist[]
+  activities    ActivityLog[]
+
+  @@map("projects")
+}
+
+model ProjectMember {
+  id        String   @id @default(uuid())
+  projectId String   @map("project_id")
+  userId    String   @map("user_id")
+  role      UserRole
+  joinedAt  DateTime @default(now()) @map("joined_at")
+
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, userId])
+  @@map("project_members")
+}
+
+model Document {
+  id              String         @id @default(uuid())
+  projectId       String         @map("project_id")
+  uploadedBy      String         @map("uploaded_by")
+  fileName        String         @map("file_name")
+  fileSize        Int            @map("file_size")
+  fileType        String         @map("file_type")
+  storagePath     String         @map("storage_path")
+  documentType    DocumentType?  @map("document_type")
+  status          DocumentStatus @default(PENDING)
+  vdrDocumentId   String?        @map("vdr_document_id")
+  createdAt       DateTime       @default(now()) @map("created_at")
+  updatedAt       DateTime       @updatedAt @map("updated_at")
+
+  project         Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  uploader        User           @relation(fields: [uploadedBy], references: [id])
+  analysis        DocumentAnalysis?
+  comments        Comment[]
+  checklistItems  ChecklistItem[]
+
+  @@map("documents")
+}
+
+model DocumentAnalysis {
+  id                String     @id @default(uuid())
+  documentId        String     @unique @map("document_id")
+  extractedText     String?    @map("extracted_text") @db.Text
+  summary           String?    @db.Text
+  keyPoints         Json?      @map("key_points")
+  entities          Json?
+  riskLevel         RiskLevel? @map("risk_level")
+  riskFactors       Json?      @map("risk_factors")
+  flags             Json?
+  metadata          Json?
+  aiModel           String?    @map("ai_model")
+  processingTime    Int?       @map("processing_time")
+  analyzedAt        DateTime   @default(now()) @map("analyzed_at")
+
+  document          Document   @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@map("document_analysis")
+}
+
+model Comment {
+  id          String   @id @default(uuid())
+  documentId  String   @map("document_id")
+  userId      String   @map("user_id")
+  content     String   @db.Text
+  pageNumber  Int?     @map("page_number")
+  position    Json?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  document    Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id])
+
+  @@map("comments")
+}
+
+model Checklist {
+  id          String   @id @default(uuid())
+  projectId   String   @map("project_id")
+  name        String
+  description String?
+  order       Int      @default(0)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  items       ChecklistItem[]
+
+  @@map("checklists")
+}
+
+model ChecklistItem {
+  id          String   @id @default(uuid())
+  checklistId String   @map("checklist_id")
+  documentId  String?  @map("document_id")
+  title       String
+  description String?
+  isCompleted Boolean  @default(false) @map("is_completed")
+  order       Int      @default(0)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  checklist   Checklist @relation(fields: [checklistId], references: [id], onDelete: Cascade)
+  document    Document? @relation(fields: [documentId], references: [id], onDelete: SetNull)
+
+  @@map("checklist_items")
+}
+
+model ActivityLog {
+  id          String   @id @default(uuid())
+  projectId   String   @map("project_id")
+  userId      String   @map("user_id")
+  action      String
+  entityType  String   @map("entity_type")
+  entityId    String   @map("entity_id")
+  metadata    Json?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id])
+
+  @@map("activity_logs")
+}
+
+model VDRSyncLog {
+  id          String   @id @default(uuid())
+  provider    String
+  projectId   String   @map("project_id")
+  syncType    String   @map("sync_type")
+  status      String
+  itemsSync   Int      @default(0) @map("items_synced")
+  errors      Json?
+  startedAt   DateTime @default(now()) @map("started_at")
+  completedAt DateTime? @map("completed_at")
+
+  @@map("vdr_sync_logs")
+}
