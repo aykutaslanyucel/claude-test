@@ -30,13 +30,35 @@ A high-end legal due diligence platform that connects to VDR providers and strea
 
 ## Getting Started
 
+### Quick Start (Recommended)
+
+Run the automated setup script:
+
+```bash
+./setup.sh
+```
+
+This will:
+- Start PostgreSQL and Redis with Docker
+- Install all dependencies
+- Run database migrations
+- Seed demo users and sample data
+
+**Demo Users** (password: `Demo123!`):
+- **Admin:** admin@legaldd.demo
+- **Manager:** manager@legaldd.demo
+- **Reviewer:** reviewer@legaldd.demo
+- **Viewer:** viewer@legaldd.demo
+
+See [Demo Users Guide](./docs/DEMO_USERS.md) for detailed information.
+
 ### Prerequisites
 - Node.js 18+
 - PostgreSQL 14+
 - Redis 7+
-- Docker & Docker Compose (optional)
+- Docker & Docker Compose (recommended)
 
-### Installation
+### Manual Installation
 
 1. Clone the repository:
 ```bash
@@ -67,7 +89,12 @@ cd backend
 npm run migrate
 ```
 
-5. Start the development servers:
+5. Seed demo data (optional but recommended):
+```bash
+npm run db:seed
+```
+
+6. Start the development servers:
 ```bash
 # Terminal 1 - Backend
 cd backend
@@ -90,9 +117,10 @@ See [CLAUDE.md](./CLAUDE.md) for detailed documentation on the codebase structur
 
 ## Documentation
 
-- [API Documentation](./docs/api/)
-- [Architecture Decisions](./docs/adr/)
-- [VDR Provider Integration Guide](./docs/vdr-providers.md)
+- [Demo Users Guide](./docs/DEMO_USERS.md) - Test accounts and sample data
+- [API Documentation](./docs/api/) - REST API reference
+- [Setup Guide](./docs/SETUP.md) - Detailed setup instructions
+- [CLAUDE.md](./CLAUDE.md) - AI assistant and development guidelines
 
 ## Contributing
 

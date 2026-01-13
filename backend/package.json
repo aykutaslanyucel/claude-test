@@ -13,7 +13,7 @@
     "test:watch": "jest --watch",
     "migrate": "prisma migrate dev",
     "migrate:prod": "prisma migrate deploy",
-    "db:seed": "tsx src/scripts/seed.ts",
+    "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio"
   },
   "keywords": [
@@ -24,6 +24,9 @@
   ],
   "author": "",
   "license": "UNLICENSED",
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.20.0",
     "@prisma/client": "^5.9.0",
