@@ -28,6 +28,22 @@ A high-end legal due diligence platform that connects to VDR providers and strea
 - Tailwind CSS + shadcn/ui
 - React Query
 
+## 🚀 Deploy to Production
+
+### Railway (Recommended - 10 minutes)
+
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new)
+
+**Quick Deploy**: See [DEPLOY_RAILWAY.md](./DEPLOY_RAILWAY.md) for step-by-step instructions.
+
+Railway provides:
+- Free tier with $5/month credit
+- Automatic PostgreSQL and Redis
+- Zero-config deployments
+- SSL certificates included
+
+**Other Platforms**: Render, Heroku, AWS, Google Cloud, Azure (docs coming soon)
+
 ## Getting Started
 
 ### Quick Start (Recommended)
@@ -117,10 +133,12 @@ See [CLAUDE.md](./CLAUDE.md) for detailed documentation on the codebase structur
 
 ## Documentation
 
-- [Demo Users Guide](./docs/DEMO_USERS.md) - Test accounts and sample data
-- [API Documentation](./docs/api/) - REST API reference
-- [Setup Guide](./docs/SETUP.md) - Detailed setup instructions
-- [CLAUDE.md](./CLAUDE.md) - AI assistant and development guidelines
+- **[Railway Deployment](./DEPLOY_RAILWAY.md)** - Quick 10-minute deployment guide
+- **[Demo Users Guide](./docs/DEMO_USERS.md)** - Test accounts and sample data
+- **[API Documentation](./docs/api/)** - REST API reference
+- **[Setup Guide](./docs/SETUP.md)** - Detailed local setup instructions
+- **[CLAUDE.md](./CLAUDE.md)** - AI assistant and development guidelines
+- **[Full Railway Guide](./docs/RAILWAY_DEPLOYMENT.md)** - Advanced deployment options
 
 ## Contributing
 
